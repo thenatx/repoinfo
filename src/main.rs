@@ -1,6 +1,11 @@
-fn main() {
+#[tokio::main]
+async fn main() {
     println!("Hello, world!");
-    let gh = octocrab::OctocrabBuilder::new().personal_token(String::from("ADODO"));
 
-    octo
+    let readme = octocrab::instance()
+        .repos("NatProgramer", "repoinfo")
+        .get_readme()
+        .r#ref("main").send().await;
+
+    println!("{:#?}", readme.unwrap());
 }
