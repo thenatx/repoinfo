@@ -1,11 +1,34 @@
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct ReadmeRes {
+    name: String,
+}
+
 #[tokio::main]
 async fn main() {
-    println!("Hello, world!");
+    let user = "NatProgramer";
+    let repository = "task-manager-server";
 
-    let readme = octocrab::instance()
-        .repos("NatProgramer", "repoinfo")
-        .get_readme()
-        .r#ref("main").send().await;
+    Ok(())
+}
 
-    println!("{:#?}", readme.unwrap());
+async fn get_readme(owner: &str, repository: &str) {
+    let client = reqwest::Client::new();
+
+    let res = client
+        .get(
+            format!("https://api.github.com/repos/{owner}/{repository}/readme")
+        )
+        .bearer_auth(GITHUB_TOKEN)
+        .header("User-Agent", user)
+        .send().await;
+    
+    match res {
+        Ok(response) => println!("{:#?}", response.json::<ReadmeRes>().await.unwrap().name),
+        Err(error) => {
+            println!("{}", error);
+            std::process::exit(1)
+        }
+    }
 }
