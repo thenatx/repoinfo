@@ -1,12 +1,12 @@
 #[tokio::main]
-async fn main() {
-    // let owner = "thenatprogramer";
+async fn main() -> Result<(), ()> {
+    let owner = "NatProgramer";
     let repository = "repoinfo";
 
-    // commands::get_readme(owner, repository).await;
-    commands::search::search_repos(repository, 1, 15).await;
+    commands::get_readme(owner, repository).await;
+    // commands::search::search_repos(repository, 1, 15).await;
 
-    Ok::<(), ()>(()).expect("A unexpected error encountred")
+    Ok(())
 }
 
 pub mod commands;

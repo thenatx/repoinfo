@@ -1,16 +1,39 @@
+use base64::engine::{general_purpose, Engine};
 use reqwest::Client;
+
 use std::process;
 
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct ReadmeRes {
-    name: String,
+    path: String,
+    content: String,
+}
+
+impl ReadmeRes {
+    fn content_decode(&self) -> String {
+        let readme_content = general_purpose::STANDARD.decode(self.content.replace("\n", ""));
+
+        match readme_content {
+            Ok(content) => match String::from_utf8(content) {
+                Ok(content_decoded) => content_decoded,
+                Err(err) => {
+                    eprintln!("A error has ocurred while try decode string to utf8");
+                    eprintln!("Error: {}", err);
+                    process::exit(1)
+                }
+            },
+            Err(error) => {
+                eprintln!("Decode error was ocurred: {}", error);
+                process::exit(1);
+            }
+        }
+    }
 }
 
 pub async fn get_readme(owner: &str, repository: &str) {
     let base_url = "https://api.github.com";
-
     let client = Client::new();
 
     let res = client
@@ -21,7 +44,19 @@ pub async fn get_readme(owner: &str, repository: &str) {
 
     match res {
         Ok(response) => {
-            println!("{:#?}", response.json::<ReadmeRes>().await.expect("").name);
+            let readme_response = response.json::<ReadmeRes>().await;
+
+            match readme_response {
+                Ok(readme) => {
+                    println!("/{}\n", readme.path);
+
+                    println!("{}", readme.content_decode().as_str());
+                }
+                Err(_) => {
+                    eprintln!("The readme not exists");
+                    process::exit(0)
+                }
+            }
         }
         Err(error) => {
             eprintln!("Has encountred the error: {}", error);
