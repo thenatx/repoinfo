@@ -15,7 +15,7 @@ pub async fn search_repos(repository: &str, page: u16, per_page: u16) {
 
     match request {
         Ok(response) => {
-            let repo_list = response.json::<RepoSearchResult>().await;
+            let repo_list = response.json::<super::RepoSearchResult>().await;
 
             match repo_list {
                 Ok(content) => {
@@ -74,29 +74,4 @@ pub async fn search_repos(repository: &str, page: u16, per_page: u16) {
             process::exit(1)
         }
     }
-}
-
-use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
-struct OwnerUser {
-    login: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct RepoSearchResultItem {
-    name: String,
-    description: Option<String>,
-    owner: OwnerUser,
-    forks: u64,
-    default_branch: String,
-    homepage: Option<String>,
-    open_issues: u64,
-    stargazers_count: u64,
-}
-
-#[derive(Debug, Deserialize)]
-struct RepoSearchResult {
-    total_count: i64,
-    items: Vec<RepoSearchResultItem>,
 }
