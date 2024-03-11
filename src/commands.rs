@@ -1,6 +1,5 @@
 use base64::engine::{general_purpose, Engine};
 use reqwest::Client;
-
 use std::process;
 
 use serde::Deserialize;
@@ -30,6 +29,29 @@ impl ReadmeRes {
             }
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+struct OwnerUser {
+    login: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct RepositoryItem {
+    name: String,
+    description: Option<String>,
+    owner: OwnerUser,
+    forks: u64,
+    default_branch: String,
+    homepage: Option<String>,
+    open_issues: u64,
+    stargazers_count: u64,
+}
+
+#[derive(Debug, Deserialize)]
+struct RepoSearchResult {
+    total_count: i64,
+    items: Vec<RepositoryItem>,
 }
 
 pub async fn get_readme(owner: &str, repository: &str) {
@@ -65,4 +87,5 @@ pub async fn get_readme(owner: &str, repository: &str) {
     }
 }
 
+pub mod repo;
 pub mod search;
