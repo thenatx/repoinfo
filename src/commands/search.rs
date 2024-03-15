@@ -1,7 +1,7 @@
 use reqwest::Client;
 use std::process;
 
-pub async fn search_repos(repository: &str, page: u16, per_page: u16) {
+pub async fn search_repos(repository: &str, page: u32, per_page: u32) {
     let base_url = "https://api.github.com";
     let client = Client::new();
 
