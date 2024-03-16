@@ -1,7 +1,9 @@
 use reqwest::Client;
 use std::process;
 
-pub async fn repo_information(owner: &str, name: &str) {
+use crate::commands::RepositoryContentItem;
+
+pub async fn repo_information(owner: &str, name: &str, show_files: bool) {
     let client = Client::new();
     let request_url = format!("https://api.github.com/repos/{owner}/{name}");
 
@@ -23,8 +25,13 @@ pub async fn repo_information(owner: &str, name: &str) {
             println!("Owner: {}", json_response.owner.login);
 
             if let Some(homepage) = json_response.homepage {
-                println!("Homepage: {}", homepage)
+                if homepage.len() > 0 {
+                    println!("Homepage: {}", homepage);
+                } else {
+                    println!("Homepage: None");
+                }
             } else {
+                println!("Homepage: None");
             }
 
             let issues = json_response.open_issues;
@@ -34,11 +41,55 @@ pub async fn repo_information(owner: &str, name: &str) {
             println!(
                 "{}",
                 format!(" {:<10}  {:<10}  {:<10}", stars, forks, issues)
-            )
+            );
+
+            if show_files == true {
+                repo_files(owner, name).await;
+            }
         }
         Err(err) => {
             eprintln!("Has ocurred a error while getting repository information");
             eprintln!("Error: {}", err);
+            process::exit(1)
+        }
+    }
+}
+
+pub async fn repo_files(owner: &str, name: &str) {
+    println!("\nRepository files:");
+    let content_url = format!("https://api.github.com/repos/{owner}/{name}/contents");
+
+    let client = Client::new();
+
+    let request = client
+        .get(content_url)
+        .header("User-Agent", name)
+        .send()
+        .await;
+
+    match request {
+        Ok(response) => match response.json::<Vec<RepositoryContentItem>>().await {
+            Ok(json_response) => {
+                for item in json_response {
+                    println!("\n{:-<100}", "");
+
+                    println!("Filename: {}", item.name);
+                    println!("Path: {}", item.path);
+                    if item.r#type == "dir" {
+                        println!("Type: Directory");
+                    } else if item.r#type == "file" {
+                        println!("Type: File");
+                    } else {
+                        println!("Type: {}", item.r#type)
+                    }
+                }
+            }
+            Err(err) => {
+                eprintln!("Error on the JSON: {}", err)
+            }
+        },
+        Err(err) => {
+            eprintln!("Bad request, error: {}", err);
             process::exit(1)
         }
     }

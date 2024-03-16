@@ -49,6 +49,14 @@ struct RepositoryItem {
 }
 
 #[derive(Debug, Deserialize)]
+struct RepositoryContentItem {
+    name: String,
+    path: String,
+    #[serde(rename = "type")]
+    r#type: String,
+}
+
+#[derive(Debug, Deserialize)]
 struct RepoSearchResult {
     total_count: i64,
     items: Vec<RepositoryItem>,

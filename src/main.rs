@@ -39,6 +39,9 @@ struct Repository {
 
     #[arg(value_name = "Name")]
     name: String,
+
+    #[arg(long = "show-files")]
+    show_files: bool,
 }
 
 #[tokio::main]
@@ -59,7 +62,12 @@ async fn main() -> Result<(), ()> {
             commands::get_readme(repository.owner.as_str(), repository.name.as_str()).await
         }
         Commands::Repo(repoinfo) => {
-            commands::repo::repo_information(repoinfo.owner.as_str(), repoinfo.name.as_str()).await
+            commands::repo::repo_information(
+                repoinfo.owner.as_str(),
+                repoinfo.name.as_str(),
+                repoinfo.show_files,
+            )
+            .await
         }
     }
 
