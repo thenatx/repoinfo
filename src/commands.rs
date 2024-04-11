@@ -1,34 +1,32 @@
 use base64::engine::{general_purpose, Engine};
 use reqwest::Client;
 use std::process;
-
 use serde::Deserialize;
 
-#[derive(Deserialize)]
-struct ReadmeRes {
-    path: String,
-    content: String,
-}
+pub async fn get_readme(owner: &str, repository: &str) -> Result<(), reqwest::Error> {
+    let base_url = "https://api.github.com";
+    let client = Client::new();
 
-impl ReadmeRes {
-    fn content_decode(&self) -> String {
-        let readme_content = general_purpose::STANDARD.decode(self.content.replace("\n", ""));
+    let response = client
+        .get(format!("{base_url}/repos/{owner}/{repository}/readme"))
+        .header("User-Agent", owner)
+        .send()
+        .await?;
 
-        match readme_content {
-            Ok(content) => match String::from_utf8(content) {
-                Ok(content_decoded) => content_decoded,
-                Err(err) => {
-                    eprintln!("A error has ocurred while try decode string to utf8");
-                    eprintln!("Error: {}", err);
-                    process::exit(1)
-                }
-            },
-            Err(error) => {
-                eprintln!("Decode error was ocurred: {}", error);
-                process::exit(1);
-            }
+    let readme_response = response.json::<ReadmeRes>().await;
+
+    match readme_response {
+        Ok(readme) => {
+            println!("/{}\n", readme.path);
+
+            println!("{}", readme.content_decode().expect("Has ocurred a error decoding file").as_str());
+        }
+        Err(_) => {
+            eprintln!("The readme not exists");
         }
     }
+
+    Ok(())
 }
 
 #[derive(Debug, Deserialize)]
@@ -62,38 +60,27 @@ struct RepoSearchResult {
     items: Vec<RepositoryItem>,
 }
 
-pub async fn get_readme(owner: &str, repository: &str) {
-    let base_url = "https://api.github.com";
-    let client = Client::new();
+#[derive(Deserialize)]
+struct ReadmeRes {
+    path: String,
+    content: String,
+}
 
-    let res = client
-        .get(format!("{base_url}/repos/{owner}/{repository}/readme"))
-        .header("User-Agent", owner)
-        .send()
-        .await;
+impl ReadmeRes {
+    fn content_decode(&self) -> Result<String, base64::DecodeError> {
+        let readme_content = general_purpose::STANDARD.decode(self.content.replace("\n", ""))?;
 
-    match res {
-        Ok(response) => {
-            let readme_response = response.json::<ReadmeRes>().await;
-
-            match readme_response {
-                Ok(readme) => {
-                    println!("/{}\n", readme.path);
-
-                    println!("{}", readme.content_decode().as_str());
-                }
-                Err(_) => {
-                    eprintln!("The readme not exists");
-                    process::exit(0)
-                }
+        match String::from_utf8(readme_content) {
+            Ok(content_decoded) => Ok(content_decoded),
+            Err(err) => {
+                eprintln!("A error has ocurred while try decode string to utf8");
+                eprintln!("Error: {}", err);
+                process::exit(0)
             }
-        }
-        Err(error) => {
-            eprintln!("Has encountred the error: {}", error);
-            process::exit(1)
         }
     }
 }
+
 
 pub mod repo;
 pub mod search;

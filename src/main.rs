@@ -55,11 +55,14 @@ async fn main() -> Result<(), ()> {
                 repository.page,
                 repository.per_page,
             )
-            .await
+            .await.expect("has occurred a error searching for repositories")
         }
 
         Commands::Readme(repository) => {
-            commands::get_readme(repository.owner.as_str(), repository.name.as_str()).await
+            commands::get_readme(
+                repository.owner.as_str(),
+                repository.name.as_str()
+            ).await.expect("has ocurred a error reading the readme, verify that the repository and readme exists")
         }
         Commands::Repo(repoinfo) => {
             commands::repo::repo_information(
@@ -74,4 +77,5 @@ async fn main() -> Result<(), ()> {
     Ok(())
 }
 
+pub mod cli;
 pub mod commands;
