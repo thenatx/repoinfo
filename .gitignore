@@ -1,4 +1,6 @@
 /target
 
+# Editors config files
 .vscode
 .idx
+.gitpod.yml
