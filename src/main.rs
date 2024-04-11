@@ -18,7 +18,7 @@ async fn main() -> Result<(), ()> {
             commands::get_readme(
                 &repository.owner,
                 &repository.name
-            ).await.expect("has ocurred a error reading the readme, verify that the repository and readme exists")
+            ).await.expect("Has ocurred a error reading the readme, verify that the repository exists and have a README.md")
         }
         cli::Commands::Repo(repoinfo) => {
             commands::repo::repo_information(
@@ -26,7 +26,7 @@ async fn main() -> Result<(), ()> {
                 &repoinfo.name,
                 repoinfo.show_files,
             )
-            .await
+            .await.expect("Has occurred a error while getting repository information, check that the repository exists and is public")
         }
     }
 

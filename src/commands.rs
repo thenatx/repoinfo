@@ -30,6 +30,11 @@ pub async fn get_readme(owner: &str, repository: &str) -> Result<(), reqwest::Er
 }
 
 #[derive(Debug, Deserialize)]
+struct GithubApiError {
+    message: String
+}
+
+#[derive(Debug, Deserialize)]
 struct OwnerUser {
     login: String,
 }
