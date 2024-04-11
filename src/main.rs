@@ -9,7 +9,7 @@ async fn main() -> Result<(), ()> {
     match args.options {
         cli::Commands::Search(repository) => {
             commands::search::search_repos(
-                repository.name.as_str(),
+                &repository.name,
                 repository.page,
                 repository.per_page,
             )
@@ -18,14 +18,14 @@ async fn main() -> Result<(), ()> {
 
         cli::Commands::Readme(repository) => {
             commands::get_readme(
-                repository.owner.as_str(),
-                repository.name.as_str()
+                &repository.owner,
+                &repository.name
             ).await.expect("has ocurred a error reading the readme, verify that the repository and readme exists")
         }
         cli::Commands::Repo(repoinfo) => {
             commands::repo::repo_information(
-                repoinfo.owner.as_str(),
-                repoinfo.name.as_str(),
+                &repoinfo.owner,
+                &repoinfo.name,
                 repoinfo.show_files,
             )
             .await
