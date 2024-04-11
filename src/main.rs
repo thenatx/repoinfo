@@ -2,9 +2,7 @@ use clap::Parser;
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
-    println!("parsing CLI");
     let args = cli::Cli::parse();
-    println!("CLI parsed");
 
     match args.options {
         cli::Commands::Search(repository) => {
